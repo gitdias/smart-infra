@@ -28,6 +28,13 @@ check_root() {
         fi
     fi
 }
-check_root "$@"
+
+main (){
+
+check_root
 
 echo "Installed successfully!"
+
+}
+main "$@"
+
