@@ -28,4 +28,6 @@ check_root() {
         fi
     fi
 }
+check_root "$@"
+
 echo "Installed successfully!"
