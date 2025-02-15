@@ -16,14 +16,14 @@ echo -e "                                        v"$VERSION"\n"
 # Function check root
 check_root() {
     if [[ $EUID -ne 0 ]]; then
-        echo "This script needs to be run as root."
+        echo -e "This script needs to be run as root."
         
         # Check if the user has sudo privileges
         if sudo -v &>/dev/null; then
-            echo "You have sudo privileges. Requesting elevated permissions..."
+            echo -e "You have sudo privileges.\nRequesting elevated permissions...\n"
             exec sudo "$0" "$@"
         else
-            echo "You do not have sudo privileges. Please provide the root password."
+            echo -e "You do not have sudo privileges.\nPlease provide the root password.\n"
             exec su -c "$0 $*" root
         fi
     fi
@@ -33,7 +33,7 @@ main (){
 
 check_root
 
-echo "Installed successfully!"
+echo -e "Installed successfully!\n"
 
 }
 main "$@"
