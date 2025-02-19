@@ -1,0 +1,7 @@
+DISTRIBUTION="Distribuição"
+VERSION="Versão"
+MAIN_LANGUAGE="Idioma principal"
+UNKNOWN="Desconhecida"
+DETECTED="Detectada"
+STARTING="Iniciando detecção da distribuição..."
+FINISHED="Detecção concluída."

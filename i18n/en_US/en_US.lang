@@ -1,0 +1,7 @@
+DISTRIBUTION="Distribution"
+VERSION="Version"
+MAIN_LANGUAGE="Main language"
+UNKNOWN="Unknown"
+DETECTED="Detected"
+STARTING="Starting distribution detection..."
+FINISHED="Detection completed."
