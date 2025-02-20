@@ -52,60 +52,41 @@ BG_BRIGHT_CYAN="\e[106m"    # Cyan Background Bright
 BG_BRIGHT_WHITE="\e[107m"   # Bright White Background
 
 detect_distro() {
-    # List of supported distributions
-    distros=("debian" "ubuntu" "redhat" "centos" "fedora" "suse" "opensuse" "mandriva" "mageia" "slackware" "arch" "solus" "alpine" "gentoo" "nixos" "elementary" "oracle" "void" "kaos" "nitrux")
-
-    # Define the files to check and their corresponding actions
-    declare -A file_checks=(
-        ["/etc/os-release"]="detect_from_os_release"
-        ["/etc/lsb-release"]="detect_from_lsb_release"
-        ["/etc/debian_version"]="detect_from_debian_version"
-    )
-
-    # Function to detect distribution from /etc/os-release
-    detect_from_os_release() {
+    # Verifica se o arquivo /etc/os-release existe
+    if [[ -f /etc/os-release ]]; then
         . /etc/os-release
-        for distro in "${distros[@]}"; do
-            if [[ "$ID" == "$distro" ]]; then
-                echo "$DISTRIBUTION $DETECTED: $ID ${VERSION_ID:-($VERSION)}"
-                return 0
-            fi
-        done
-        echo "$DISTRIBUTION $UNKNOWN ($ID)"
-        return 1
-    }
 
-    # Function to detect distribution from /etc/lsb-release
-    detect_from_lsb_release() {
-        . /etc/lsb-release
-        echo "$DISTRIBUTION $DETECTED: $DISTRIB_ID $DISTRIB_RELEASE"
-        return 0
-    }
-
-    # Function to detect distribution from /etc/debian_version
-    detect_from_debian_version() {
-        echo "$DISTRIBUTION $DETECTED: Debian ($(cat /etc/debian_version))"
-        return 0
-    }
-
-    # Iterate over the file checks
-    for file in "${!file_checks[@]}"; do
-        if [[ -f "$file" ]]; then
-            ${file_checks[$file]}
-            return
+        # Imprime PRETTY_NAME se estiver definida
+        if [[ -n "$PRETTY_NAME" ]]; then
+            echo "Distribuição detectada: $PRETTY_NAME"
+        else
+            # Caso PRETTY_NAME esteja vazia, imprime NAME e VERSION
+            echo "Distribuição detectada: $NAME $VERSION"
         fi
-    done
-
-    # Check for specific /etc/$distro-release files
-    for distro in "${distros[@]}"; do
-        if [[ -f "/etc/${distro}-release" ]]; then
-            echo "$DISTRIBUTION $DETECTED: $distro ($(cat /etc/${distro}-release))"
-            return
+    else
+        # Verifica outros arquivos específicos
+        if [[ -f /etc/debian_version ]]; then
+            echo "Distribuição detectada: Debian ($(cat /etc/debian_version))"
+        elif [[ -f /etc/redhat-release ]]; then
+            echo "Distribuição detectada: Red Hat ($(cat /etc/redhat-release))"
+        elif [[ -f /etc/centos-release ]]; then
+            echo "Distribuição detectada: CentOS ($(cat /etc/centos-release))"
+        elif [[ -f /etc/fedora-release ]]; then
+            echo "Distribuição detectada: Fedora ($(cat /etc/fedora-release))"
+        elif [[ -f /etc/SuSE-release ]]; then
+            echo "Distribuição detectada: SUSE ($(head -n 1 /etc/SuSE-release))"
+        elif [[ -f /etc/arch-release ]]; then
+            echo "Distribuição detectada: Arch Linux"
+        elif [[ -f /etc/alpine-release ]]; then
+            echo "Distribuição detectada: Alpine Linux ($(cat /etc/alpine-release))"
+        elif [[ -f /etc/gentoo-release ]]; then
+            echo "Distribuição detectada: Gentoo ($(cat /etc/gentoo-release))"
+        elif [[ -f /etc/oracle-release ]]; then
+            echo "Distribuição detectada: Oracle Linux ($(cat /etc/oracle-release))"
+        else
+            echo "Distribuição não detectada."
         fi
-    done
-
-    # If no distribution is detected
-    echo "$DISTRIBUTION $UNKNOWN"
+    fi
 }
 
 # Print header
