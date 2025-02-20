@@ -51,12 +51,69 @@ BG_BRIGHT_MAGENTA="\e[105m" # Bright Magenta Background
 BG_BRIGHT_CYAN="\e[106m"    # Cyan Background Bright
 BG_BRIGHT_WHITE="\e[107m"   # Bright White Background
 
+detect_distro() {
+    # List of supported distributions
+    distros=("debian" "ubuntu" "redhat" "centos" "fedora" "suse" "opensuse" "mandriva" "mageia" "slackware" "arch" "solus" "alpine" "gentoo" "nixos" "elementary" "oracle" "void" "kaos" "nitrux")
+
+    # Define the files to check and their corresponding actions
+    declare -A file_checks=(
+        ["/etc/os-release"]="detect_from_os_release"
+        ["/etc/lsb-release"]="detect_from_lsb_release"
+        ["/etc/debian_version"]="detect_from_debian_version"
+    )
+
+    # Function to detect distribution from /etc/os-release
+    detect_from_os_release() {
+        . /etc/os-release
+        for distro in "${distros[@]}"; do
+            if [[ "$ID" == "$distro" ]]; then
+                echo "$DISTRIBUTION $DETECTED: $ID ${VERSION_ID:-($VERSION)}"
+                return 0
+            fi
+        done
+        echo "$DISTRIBUTION $UNKNOWN ($ID)"
+        return 1
+    }
+
+    # Function to detect distribution from /etc/lsb-release
+    detect_from_lsb_release() {
+        . /etc/lsb-release
+        echo "$DISTRIBUTION $DETECTED: $DISTRIB_ID $DISTRIB_RELEASE"
+        return 0
+    }
+
+    # Function to detect distribution from /etc/debian_version
+    detect_from_debian_version() {
+        echo "$DISTRIBUTION $DETECTED: Debian ($(cat /etc/debian_version))"
+        return 0
+    }
+
+    # Iterate over the file checks
+    for file in "${!file_checks[@]}"; do
+        if [[ -f "$file" ]]; then
+            ${file_checks[$file]}
+            return
+        fi
+    done
+
+    # Check for specific /etc/$distro-release files
+    for distro in "${distros[@]}"; do
+        if [[ -f "/etc/${distro}-release" ]]; then
+            echo "$DISTRIBUTION $DETECTED: $distro ($(cat /etc/${distro}-release))"
+            return
+        fi
+    done
+
+    # If no distribution is detected
+    echo "$DISTRIBUTION $UNKNOWN"
+}
+
 # Print header
 header() {
     # VARIABLES
     local TITLE="     S M A R T  #  I N F R A     "
     local LENGTH=${#TITLE}
-    local VERSION="0.0.1"
+    local VERSION="0.0.2"
     echo -e "\n        ${BRIGHT_CYAN}╭$(printf '─%.0s' $(seq 1 $((LENGTH + 10))))╮${RESET}"
     echo -e "        ${BRIGHT_CYAN}│                                           │${RESET}"
     echo -e "  ${BRIGHT_CYAN}────────│${RESET}   ${BRIGHT_WHITE}$TITLE${RESET}   ${BRIGHT_CYAN}│────────${RESET}"
@@ -86,6 +143,7 @@ check_root() {
 main() {
     header
     check_root "$@"
+    detect_distro
     echo -e "${BRIGHT_WHITE}\tInstalled successfully!${RESET}\n"
     exit
 }
